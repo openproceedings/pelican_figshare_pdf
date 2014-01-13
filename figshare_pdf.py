@@ -49,6 +49,7 @@ class FigshareInterface(object):
         response = self.client.put('http://api.figshare.com/v1/my_data/articles/%d/categories' % article_id, auth=self.oauth,
                                 data=json.dumps(body), headers=headers)
         results = json.loads(response.content)
+        return results
 
     def set_tag(self, article_id, tag):
         body = {'tag_name':'proceedings'}
@@ -56,6 +57,7 @@ class FigshareInterface(object):
         response = self.client.put('http://api.figshare.com/v1/my_data/articles/%d/tags' % article_id, auth=self.oauth,
                                 data=json.dumps(body), headers=headers)
         results = json.loads(response.content)
+        return results
 
     def set_authors(self, article_id, authors):
         for author in authors:
@@ -82,6 +84,8 @@ class FigshareInterface(object):
                 results = json.loads(response.content)
             except exceptions.KeyError:
                 logger.error("Cannot create author %s, figshare response %s" % (author, json.dumps(results)))
+        return results
+
 
     def upload_pdf(self, article_id, output_pdf):
         files = {'filedata':(os.path.basename(output_pdf), open(output_pdf, 'rb'))}
@@ -89,10 +93,12 @@ class FigshareInterface(object):
         response = self.client.put('http://api.figshare.com/v1/my_data/articles/%d/files' % article_id, auth=self.oauth,
                               files=files)
         results = json.loads(response.content)
+        return results
 
     def make_public(self, article_id):
         response = self.client.post('http://api.figshare.com/v1/my_data/articles/%d/action/make_public' % article_id, auth=self.oauth)
         results = json.loads(response.content)
+        return results
 
 class FigshareGenerator(Generator):
     def __init__(self, *args, **kwargs):
