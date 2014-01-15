@@ -15,7 +15,7 @@ class EmptyObject(object):
     pass
 
 obj = EmptyObject()
-obj.title = "Test Figshare PDF"
+obj.title = "Test Figshare PDF 2"
 obj.summary = "Summary goes here"
 obj.author = EmptyObject()
 obj.author.name = "Firstname Lastname, Firstname2 Lastname2"
@@ -24,9 +24,13 @@ meta = {}
 figshare = FigshareInterface(settings)
 
 meta["article_id"], meta["doi"], response = figshare.create_article(obj)
+assert not response.has_key("error")
 
-#figshare.set_category(meta["article_id"], settings.get("FIGSHARE_CATEGORY_ID", 77)) # default applied computer science
-#figshare.set_tag(meta["article_id"], "proceedings")
-#figshare.set_authors(meta["article_id"],  [author.strip() for author in obj.author.name.split(",")])
-#
-#figshare.upload_pdf(meta["article_id"], output_pdf)
+response = figshare.set_category(meta["article_id"], settings.get("FIGSHARE_CATEGORY_ID", 77)) # default applied computer science
+assert response.has_key("success")
+response = figshare.set_tag(meta["article_id"], "proceedings")
+assert response.has_key("success")
+response = figshare.set_authors(meta["article_id"],  [author.strip() for author in obj.author.name.split(",")])
+assert not response.has_key("error")
+response = figshare.upload_pdf(meta["article_id"], output_pdf)
+assert response.has_key("extension")
