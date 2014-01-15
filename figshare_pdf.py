@@ -25,7 +25,7 @@ import json
 
 class FigshareInterface(object):
 
-    def __init__(self):
+    def __init__(self, settings):
         self.oauth = OAuth1( client_key=settings["FIGSHARE_CLIENT_KEY"], client_secret=settings["FIGSHARE_CLIENT_SECRET"],
                    resource_owner_key=settings["FIGSHARE_TOKEN_KEY"], resource_owner_secret=settings["FIGSHARE_TOKEN_SECRET"], signature_type = 'auth_header')
         self.client = requests.session()
@@ -41,7 +41,7 @@ class FigshareInterface(object):
         results = json.loads(response.content)
         article_id = results["article_id"]
         doi = results["doi"]
-        return article_id, doi
+        return article_id, doi, results
 
     def set_category(self, article_id, category_id):
         body = {'category_id': category_id}
