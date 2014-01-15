@@ -8,7 +8,7 @@ Uploads PDF versions of articles to FigShare
 
 from __future__ import unicode_literals, print_function
 
-from pelican import signals, settings
+from pelican import signals
 from pelican.generators import Generator
 
 import os
@@ -24,8 +24,9 @@ import json
 class FigshareInterface(object):
 
     def __init__(self, settings):
-        self.oauth = OAuth1( client_key=settings["FIGSHARE_CLIENT_KEY"], client_secret=settings["FIGSHARE_CLIENT_SECRET"],
-                   resource_owner_key=settings["FIGSHARE_TOKEN_KEY"], resource_owner_secret=settings["FIGSHARE_TOKEN_SECRET"], signature_type = 'auth_header')
+        self.settings = settings
+        self.oauth = OAuth1( client_key=self.settings["FIGSHARE_CLIENT_KEY"], client_secret=self.settings["FIGSHARE_CLIENT_SECRET"],
+                   resource_owner_key=self.settings["FIGSHARE_TOKEN_KEY"], resource_owner_secret=self.settings["FIGSHARE_TOKEN_SECRET"], signature_type = 'auth_header')
         self.client = requests.session()
 
     def create_article(self, obj):
@@ -37,6 +38,8 @@ class FigshareInterface(object):
         response = self.client.post('http://api.figshare.com/v1/my_data/articles', auth=self.oauth, data=json.dumps(body), headers=headers)
 
         results = json.loads(response.content)
+        if results.has_key("error"):
+            logger.error(results["error"])
         article_id = results["article_id"]
         doi = results["doi"]
         return article_id, doi, results
@@ -109,19 +112,19 @@ class FigshareGenerator(Generator):
             json_filename = obj.slug + "-figshare.json"
             output_json = os.path.join(output_path, json_filename)
             if os.path.exists(output_pdf):
-                figshare = FigshareInterface()
+                figshare = FigshareInterface(self.settings)
 
                 if os.path.exists(output_json):
                     with open(output_json, "r") as json_file:
                         meta = json.load(json_file)
                 else:
-                    meta = {"update":False}
-                    meta["article_id"], meta["doi"] = figshare.create_article(obj)
+                    meta = {"update":True}
+                    meta["article_id"], meta["doi"], _ = figshare.create_article(obj)
 
-                    figshare.set_category(meta["article_id"], settings.get("FIGSHARE_CATEGORY_ID", 77)) # default applied computer science
+                    figshare.set_category(meta["article_id"], self.settings.get("FIGSHARE_CATEGORY_ID", 77)) # default applied computer science
                     figshare.set_tag(meta["article_id"], "proceedings")
-                    if obj.has_attr("author_figshare_ids"):
-                        figshare.set_authors(meta["article_id"],  obj.author_figshare_ids)
+                    if hasattr(obj, "author_figshare_ids"):
+                        figshare.set_authors(meta["article_id"],  map(int, obj.author_figshare_ids.split(",")))
 
                 if meta["update"]:
                     figshare.upload_pdf(meta["article_id"], output_pdf)
