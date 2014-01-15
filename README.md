@@ -2,7 +2,21 @@
 Upload PDF to FigShare
 -------------
 
-Publish to figshare plugin:
+Automatically publish articles to FigShare in PDF format.
+
+Add `figshare_pdf` plugin after `pdf` in the plugins:
+
+    PLUGINS = ["pdf", "figshare_pdf"]
+
+Get API credentials from your FigShare account and add to `pelicanconf.py`:
+
+    FIGSHARE_CLIENT_KEY = ''
+    FIGSHARE_CLIENT_SECRET = ''
+    FIGSHARE_TOKEN_KEY = ''
+    FIGSHARE_TOKEN_SECRET = ''
+    FIGSHARE_CATEGORY_ID = 77 #applied computer science
+
+How it works:
 
 * runs after PDF plugin
 * creates new private article on figshare
