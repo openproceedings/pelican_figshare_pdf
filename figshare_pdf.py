@@ -120,7 +120,8 @@ class FigshareGenerator(Generator):
 
                     figshare.set_category(meta["article_id"], settings.get("FIGSHARE_CATEGORY_ID", 77)) # default applied computer science
                     figshare.set_tag(meta["article_id"], "proceedings")
-                    figshare.set_authors(meta["article_id"],  obj.author_figshare_ids)
+                    if obj.has_attr("author_figshare_ids"):
+                        figshare.set_authors(meta["article_id"],  obj.author_figshare_ids)
 
                 if meta["update"]:
                     figshare.upload_pdf(meta["article_id"], output_pdf)
