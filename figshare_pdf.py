@@ -16,8 +16,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-import exceptions
-
 ### figshare
 import requests
 from requests_oauthlib import OAuth1
@@ -60,30 +58,30 @@ class FigshareInterface(object):
         return results
 
     def set_authors(self, article_id, authors):
-        for author in authors:
-            response = self.client.get('http://api.figshare.com/v1/my_data/authors?search_for=%s' % author, auth=self.oauth)
+        for author_id in authors:
+            #response = self.client.get('http://api.figshare.com/v1/my_data/authors?search_for=%s' % author, auth=self.oauth)
+            #results = json.loads(response.content)
+
+            #try:
+#                if results["results"] == 0:
+#                    logger.info("Author %s not found, creating" % author)
+#                    body = {'full_name':author}
+#                    headers = {'content-type':'application/json'}
+#                    response = self.client.post('http://api.figshare.com/v1/my_data/authors', auth=self.oauth,
+#                                            data=json.dumps(body), headers=headers)
+#                    results = json.loads(response.content)
+#                    author_id = results["id"]
+#                else:
+#                    author_id = results["items"][0]["id"] # get first matching author
+#
+            body = {'author_id':author_id}
+            headers = {'content-type':'application/json'}
+
+            response = self.client.put('http://api.figshare.com/v1/my_data/articles/%d/authors' % article_id, auth=self.oauth,
+                                    data=json.dumps(body), headers=headers)
             results = json.loads(response.content)
-
-            try:
-                if results["results"] == 0:
-                    logger.info("Author %s not found, creating" % author)
-                    body = {'full_name':author}
-                    headers = {'content-type':'application/json'}
-                    response = self.client.post('http://api.figshare.com/v1/my_data/authors', auth=self.oauth,
-                                            data=json.dumps(body), headers=headers)
-                    results = json.loads(response.content)
-                    author_id = results["id"]
-                else:
-                    author_id = results["items"][0]["id"] # get first matching author
-
-                body = {'author_id':author_id}
-                headers = {'content-type':'application/json'}
-
-                response = self.client.put('http://api.figshare.com/v1/my_data/articles/%d/authors' % article_id, auth=self.oauth,
-                                        data=json.dumps(body), headers=headers)
-                results = json.loads(response.content)
-            except exceptions.KeyError:
-                logger.error("Cannot create author %s, figshare response %s" % (author, json.dumps(results)))
+            #except exceptions.KeyError:
+            #    logger.error("Cannot create author %s, figshare response %s" % (author, json.dumps(results)))
         return results
 
 
@@ -122,7 +120,7 @@ class FigshareGenerator(Generator):
 
                     figshare.set_category(meta["article_id"], settings.get("FIGSHARE_CATEGORY_ID", 77)) # default applied computer science
                     figshare.set_tag(meta["article_id"], "proceedings")
-                    figshare.set_authors(meta["article_id"],  [author.strip() for author in obj.author.name.split(",")])
+                    figshare.set_authors(meta["article_id"],  obj.author_figshare_ids)
 
                 if meta["update"]:
                     figshare.upload_pdf(meta["article_id"], output_pdf)

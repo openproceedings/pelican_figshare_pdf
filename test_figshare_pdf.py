@@ -30,7 +30,7 @@ response = figshare.set_category(meta["article_id"], settings.get("FIGSHARE_CATE
 assert response.has_key("success")
 response = figshare.set_tag(meta["article_id"], "proceedings")
 assert response.has_key("success")
-response = figshare.set_authors(meta["article_id"],  [author.strip() for author in obj.author.name.split(",")])
+response = figshare.set_authors(meta["article_id"],  [97686])
 assert not response.has_key("error")
 response = figshare.upload_pdf(meta["article_id"], output_pdf)
 assert response.has_key("extension")
