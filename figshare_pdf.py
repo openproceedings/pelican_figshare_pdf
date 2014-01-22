@@ -7,6 +7,7 @@ Uploads PDF versions of articles to FigShare
 '''
 
 from __future__ import unicode_literals, print_function
+import exceptions
 
 from pelican import signals
 from pelican.generators import Generator
@@ -20,6 +21,9 @@ logger = logging.getLogger(__name__)
 import requests
 from requests_oauthlib import OAuth1
 import json
+
+class FigshareAPIError(exceptions.Exception):
+    pass
 
 class FigshareInterface(object):
 
@@ -40,6 +44,7 @@ class FigshareInterface(object):
         results = json.loads(response.content)
         if results.has_key("error"):
             logger.error(results["error"])
+            raise FigshareAPIError(results["error"])
         article_id = results["article_id"]
         doi = results["doi"]
         return article_id, doi, results

@@ -4,7 +4,7 @@ from glob import glob
 from figshare_pdf import FigshareInterface
 from pelican.settings import read_settings
 
-settings = read_settings(path="../../pelicanconf.py")
+settings = read_settings(path="../pelicanconf.py")
 
 output_path = "/home/zonca/dev/openproceedings/openproceedings-buildbot/output/pdf"
 output_pdf = glob(os.path.join(output_path, "*.pdf"))[0]
@@ -15,7 +15,7 @@ class EmptyObject(object):
     pass
 
 obj = EmptyObject()
-obj.title = "Test Figshare PDF 2"
+obj.title = "Test Figshare PDF 4"
 obj.summary = "Summary goes here"
 obj.author = EmptyObject()
 obj.author.name = "Firstname Lastname, Firstname2 Lastname2"
