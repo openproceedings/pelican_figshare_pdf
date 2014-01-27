@@ -115,7 +115,8 @@ class FigshareGenerator(Generator):
             filename = obj.slug + ".pdf"
             output_pdf = os.path.join(output_path, filename)
             json_filename = obj.slug + "-figshare.json"
-            output_json = os.path.join(output_path, json_filename)
+            source_path = os.path.dirname(obj.source_path)
+            output_json = os.path.join(source_path, json_filename)
             if os.path.exists(output_pdf):
                 figshare = FigshareInterface(self.settings)
 
