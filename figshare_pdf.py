@@ -13,6 +13,7 @@ from pelican import signals
 from pelican.generators import Generator
 
 import os
+import os.path
 import logging
 
 logger = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ class FigshareGenerator(Generator):
     def __init__(self, *args, **kwargs):
         super(FigshareGenerator, self).__init__(*args, **kwargs)
 
-    def _upload_figshare(self, obj, output_path):
+    def _upload_figshare(self, obj, output_path, bib_path):
         if obj.source_path.endswith('.rst'):
             filename = obj.slug + ".pdf"
             output_pdf = os.path.join(output_path, filename)
@@ -136,8 +137,19 @@ class FigshareGenerator(Generator):
                 meta["update"] = False
                 with open(output_json, "w") as json_file:
                     json.dump(meta, json_file)
+
+                output_bib = os.path.join(bib_path, obj.slug + ".bib")
+                input_filename = os.path.splitext(os.path.basename(obj.source_path))[0]
+                with open(output_bib, "w") as bib_file:
+                    bib_file.write(self.settings["FIGSHARE_BIBTEX_TEMPLATE"] % dict(
+                                                                                authors=obj.author, 
+                                                                                title=obj.title, 
+                                                                                doi=meta["doi"].replace("http://dx.doi.org/",""),
+                                                                                url=meta["doi"],
+                                                                                tag=input_filename))
             else:
                 logger.error("Missing PDF file: %s" % output_pdf)
+            
 
     def generate_context(self):
         pass
@@ -145,9 +157,16 @@ class FigshareGenerator(Generator):
     def generate_output(self, writer=None):
         logger.info(' Uploading PDF files to Figshare...')
         pdf_path = os.path.join(self.output_path, 'pdf')
+        bib_path = os.path.join(self.output_path, 'bib')
+        if not os.path.exists(bib_path):
+            try:
+                os.mkdir(bib_path)
+            except OSError:
+                logger.error("Couldn't create the bib output folder in " +
+                             bib_path)
 
         for article in self.context['articles']:
-            self._upload_figshare(article, pdf_path)
+            self._upload_figshare(article, pdf_path, bib_path)
 
 def get_generators(generators):
     return FigshareGenerator
