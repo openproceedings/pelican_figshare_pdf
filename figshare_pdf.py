@@ -10,6 +10,7 @@ from __future__ import unicode_literals, print_function
 import exceptions
 
 from pelican import signals
+from pelican import contents
 from pelican.generators import Generator
 
 import os
@@ -140,6 +141,7 @@ class FigshareGenerator(Generator):
 
                 output_bib = os.path.join(bib_path, obj.slug + ".bib")
                 input_filename = os.path.splitext(os.path.basename(obj.source_path))[0]
+                
                 with open(output_bib, "w") as bib_file:
                     bib_file.write(self.settings["FIGSHARE_BIBTEX_TEMPLATE"] % dict(
                                                                                 authors=obj.author, 
@@ -171,5 +173,14 @@ class FigshareGenerator(Generator):
 def get_generators(generators):
     return FigshareGenerator
 
+def insert_doi(instance):
+    if type(instance) != contents.Article: return
+    output_json = instance.source_path.replace(".rst", "-figshare.json")
+    if os.path.exists(output_json):
+        with open(output_json, "r") as json_file:
+            meta = json.load(json_file)
+    instance.doi = meta["doi"]
+
 def register():
     signals.get_generators.connect(get_generators)
+    signals.content_object_init.connect(insert_doi)
