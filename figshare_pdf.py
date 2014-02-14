@@ -179,7 +179,7 @@ def insert_doi(instance):
     if os.path.exists(output_json):
         with open(output_json, "r") as json_file:
             meta = json.load(json_file)
-    instance.doi = meta["doi"]
+        instance.doi = meta["doi"]
 
 def register():
     signals.get_generators.connect(get_generators)
